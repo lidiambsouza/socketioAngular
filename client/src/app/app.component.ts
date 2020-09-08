@@ -1,4 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild, ElementRef, ViewChildren, QueryList } from '@angular/core';
+import { SocketIoService } from './socket-io.service';
+import { Message } from './message';
+import { Subscription } from 'rxjs';
+import { MatList, MatListItem } from '@angular/material/list';
 
 @Component({
   selector: 'app-root',
@@ -6,5 +10,38 @@ import { Component } from '@angular/core';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  title = 'client';
+  nickname: string;
+  message: string;
+  messages: Message[] = [];
+  subjMessages: Subscription;
+  
+  @ViewChild(MatList, {read: ElementRef, static: true}) list:ElementRef;
+  @ViewChildren(MatListItem) listItems: QueryList<MatListItem>;
+
+
+  constructor(private socketService: SocketIoService){
+
+  }
+  ngOnInit(): void {
+    //Called after the constructor, initializing input properties, and the first call to ngOnChanges.
+    //Add 'implements OnInit' to the class.
+    this.subjMessages = this.socketService.messages().subscribe((m: Message)=>{
+      console.log(m)
+      this.messages.push(m);
+    });
+  }
+
+  send(){
+    this.socketService.send({
+      from: this.nickname,
+      message: this.message
+    });
+    this.message = '';
+  }
+
+  ngOnDestroy(): void {
+    //Called once, before the instance is destroyed.
+    //Add 'implements OnDestroy' to the class.
+    this.subjMessages.unsubscribe();
+  }
 }
