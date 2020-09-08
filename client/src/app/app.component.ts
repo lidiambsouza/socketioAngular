@@ -14,6 +14,7 @@ export class AppComponent {
   message: string;
   messages: Message[] = [];
   subjMessages: Subscription;
+  subjList: Subscription;
   
   @ViewChild(MatList, {read: ElementRef, static: true}) list:ElementRef;
   @ViewChildren(MatListItem) listItems: QueryList<MatListItem>;
@@ -30,7 +31,14 @@ export class AppComponent {
       this.messages.push(m);
     });
   }
-
+  ngAfterViewInit(): void {
+    //Called after ngAfterContentInit when the component's view has been initialized. Applies to components only.
+    //Add 'implements AfterViewInit' to the class.
+    this.subjList= this.listItems.changes.subscribe((e)=>{
+      console.log(e);
+      this.list.nativeElement.scrollTop = this.list.nativeElement.scrollHeight;
+    });
+  }
   send(){
     this.socketService.send({
       from: this.nickname,
@@ -43,5 +51,6 @@ export class AppComponent {
     //Called once, before the instance is destroyed.
     //Add 'implements OnDestroy' to the class.
     this.subjMessages.unsubscribe();
+    this.subjList.unsubscribe();
   }
 }
