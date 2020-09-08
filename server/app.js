@@ -11,6 +11,16 @@ io.on('connection', (socket)=>{
         // todos conectados
         io.emit('message', msg);
     })
+
+    let sub = setInterval(()=>{
+        io.to(socket.id).emit('message', {
+            from:'server',
+            message: 'Hello from server'
+        });
+    }, 2000);
+
+   // socket.on('disconnection')
+
 })
 
 
